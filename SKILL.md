@@ -46,6 +46,24 @@ Référentiel complet du système de gestion de configuration Drupal 8-11+ : cyc
 | Modifier une config dans un hook_update | `\Drupal::configFactory()->getEditable()` | [config-hooks.md](config-hooks.md) |
 | Script post-import qui tourne une seule fois | `hook_deploy_N()` | [config-hooks.md](config-hooks.md) |
 | Typer et valider sa config custom | `config/schema/mon_module.schema.yml` | [config-hooks.md](config-hooks.md) |
+| Config importée seulement si dépendances OK | `config/optional/` dans le module | [config-optional.md](config-optional.md) |
+| Différence install/ vs optional/ | optional = conditionnel aux dépendances | [config-optional.md](config-optional.md) |
+| Forcer l'import d'une optional config après install | `config.installer` service ou `drush config:import --partial` | [config-optional.md](config-optional.md) |
+| Ordre CI/CD correct (config avant migrations) | `drush deploy` puis `drush migrate:import` | [config-optional.md](config-optional.md) |
+| Importer config optional en hook_install | `\Drupal::service('config.installer')->installOptionalConfig()` | [config-optional.md](config-optional.md) |
+| Distribuer un set de config réutilisable | Drupal Recipes (`recipe.yml`) | [drupal-recipes.md](drupal-recipes.md) |
+| Appliquer une recipe sur un site existant | `drush recipe web/recipes/mon_recipe` | [drupal-recipes.md](drupal-recipes.md) |
+| Config Actions (createIfNotExists, grantPermissions) | `config.actions:` dans recipe.yml | [drupal-recipes.md](drupal-recipes.md) |
+| Traduire la config (labels de menus, Views, blocs) | Module `config_translation` + `locale` | [config-translation.md](config-translation.md) |
+| Importer des traductions `.po` en masse | `drush locale:import fr fichier.po` | [config-translation.md](config-translation.md) |
+| Traduire la config programmatiquement | `language_manager->getLanguageConfigOverride()` | [config-translation.md](config-translation.md) |
+| Comprendre où sont stockées les traductions de config | Tables `locale_*` de la DB (pas dans YAML) | [config-translation.md](config-translation.md) |
+| Mettre à jour les traductions contrib depuis drupal.org | `drush locale:update` | [config-translation.md](config-translation.md) |
+| Configurer plusieurs sites sur une installation | `sites.php` + `settings.php` par site | [multisite.md](multisite.md) |
+| Config partagée + config spécifique par site | `config_split` par site, activé dans `settings.php` | [multisite.md](multisite.md) |
+| Exécuter drush sur un site multisite spécifique | `drush --uri=https://site.com` | [multisite.md](multisite.md) |
+| Installer un nouveau site dans un multisite | `drush site:install --uri=` + `sites.php` | [multisite.md](multisite.md) |
+| Docker Compose multisite (un PHP, plusieurs DBs) | Variables env `MARIADB_DATABASE_SITE_*` par site | [multisite.md](multisite.md) |
 
 ## Anti-Patterns Critiques
 
@@ -84,4 +102,5 @@ Référentiel complet du système de gestion de configuration Drupal 8-11+ : cyc
 - `drupal-core` — Config API PHP (lecture/écriture programmatique simple)
 - `drupal-theming` — Config du thème (`config/install/` du thème)
 - `drupal-testing` — Tester la config avec KernelTest
-- `drupal-tooling` — DDEV, Drush, pipelines de déploiement
+- `drush` — Drush CLI complet (cex/cim, deploy, sql-dump, aliases)
+- `drupal-docker` — Environnement Docker Compose, config, hooks, services

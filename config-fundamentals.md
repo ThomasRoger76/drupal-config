@@ -167,8 +167,8 @@ $node_types = \Drupal::configFactory()->listAll('node.type.');
 $all = \Drupal::configFactory()->listAll();
 
 // Depuis Drush
-// ddev drush config:list
-// ddev drush config:list --prefix=node.type
+// docker compose exec php drush config:list
+// docker compose exec php drush config:list --prefix=node.type
 ```
 
 ---

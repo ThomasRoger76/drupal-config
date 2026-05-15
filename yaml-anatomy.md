@@ -101,7 +101,7 @@ settings:
 ### Symptôme
 
 ```bash
-$ ddev drush cim -y
+$ docker compose exec php drush cim -y
 # Erreur :
 [error]  The import failed due to the following reasons:
          Site UUID in source storage does not match the site UUID in target storage.
@@ -120,14 +120,14 @@ grep "^uuid:" config/sync/system.site.yml
 # → uuid: 'a8a38c7c-1b2c-4d5e-8f9a-0b1c2d3e4f5a'
 
 # Appliquer cet UUID au site cible
-ddev drush config:set system.site uuid "a8a38c7c-1b2c-4d5e-8f9a-0b1c2d3e4f5a"
-ddev drush cim -y
+docker compose exec php drush config:set system.site uuid "a8a38c7c-1b2c-4d5e-8f9a-0b1c2d3e4f5a"
+docker compose exec php drush cim -y
 ```
 
 **Option 2 — Mettre à jour le YAML (si le site cible est le "bon")**
 ```bash
 # Lire l'UUID du site cible
-ddev drush config:get system.site uuid
+docker compose exec php drush config:get system.site uuid
 
 # Mettre à jour le fichier YAML
 # → éditer config/sync/system.site.yml → remplacer l'uuid
@@ -137,8 +137,8 @@ ddev drush config:get system.site uuid
 **Option 3 — Pour un nouveau site qui reprend la config d'un autre**
 ```bash
 # Script de setup initial (une seule fois)
-ddev drush config:set system.site uuid "$(grep '^uuid:' config/sync/system.site.yml | awk '{print $2}' | tr -d "'")"
-ddev drush cim -y
+docker compose exec php drush config:set system.site uuid "$(grep '^uuid:' config/sync/system.site.yml | awk '{print $2}' | tr -d "'")"
+docker compose exec php drush cim -y
 ```
 
 ---
@@ -147,7 +147,7 @@ ddev drush cim -y
 
 ```bash
 # Voir le diff détaillé
-ddev drush config:diff views.view.frontpage
+docker compose exec php drush config:diff views.view.frontpage
 ```
 
 **Exemple de diff :**

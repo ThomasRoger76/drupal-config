@@ -166,26 +166,26 @@ foreach ($dependent_configs as $dep) {
 
 ```bash
 # Via Drush — voir ce qui sera supprimé
-ddev drush pm:uninstall mon_module --simulate    # Dry-run : affiche ce qui serait supprimé sans exécuter
+docker compose exec php drush pm:uninstall mon_module --simulate    # Dry-run : affiche ce qui serait supprimé sans exécuter
 ```
 
 ### Désinstaller un module sans perdre la config
 
 ```bash
 # 1. Vérifier les dépendances
-ddev drush pm:uninstall mon_module --no
+docker compose exec php drush pm:uninstall mon_module --no
 
 # 2. Exporter la config du module avant désinstallation
-ddev drush config:export
+docker compose exec php drush config:export
 git diff config/sync/
 
 # 3. Supprimer les config entities du module manuellement si nécessaire
-ddev drush config:delete mon_module.settings
-ddev drush config:delete views.view.mon_module_view
+docker compose exec php drush config:delete mon_module.settings
+docker compose exec php drush config:delete views.view.mon_module_view
 
 # 4. Désinstaller
-ddev drush pm:uninstall mon_module -y
-ddev drush cex -y   # Exporter l'état final
+docker compose exec php drush pm:uninstall mon_module -y
+docker compose exec php drush cex -y   # Exporter l'état final
 ```
 
 ---

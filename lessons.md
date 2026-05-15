@@ -21,8 +21,8 @@ Pièges courants documentés dès la v1 :
 ### UUID du site — "Site UUID does not match" à chaque réinstallation
 - **Symptôme :** `drush cim` échoue avec "Site UUID in source storage does not match"
 - **Cause :** UUID différent entre les fichiers YAML (site source) et la DB du site cible (réinstallation fraîche ou site différent)
-- **Correct :** `ddev drush config:set system.site uuid "UUID-DU-YAML"` puis `drush cim`
-- **Prévention :** Dans le README du projet, documenter cet UUID et l'étape de setup initial. Automatiser dans un script `make init` ou `ddev start`
+- **Correct :** `docker compose exec php drush config:set system.site uuid "UUID-DU-YAML"` puis `drush cim`
+- **Prévention :** Dans le README du projet, documenter cet UUID et l'étape de setup initial. Automatiser dans un script `make init` ou `docker compose exec php start`
 
 ### `$config_directories['sync']` supprimé D9 — Erreur silencieuse
 - **Symptôme :** Le sync directory est ignoré, `drush cex` exporte ailleurs

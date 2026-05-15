@@ -75,7 +75,7 @@ Config Split permet d'avoir des sets de configuration différents selon l'enviro
 
 ```bash
 composer require drupal/config_split
-ddev drush en config_split -y
+docker compose exec php drush en config_split -y
 ```
 
 ### Setup : 3 splits recommandés
@@ -136,7 +136,7 @@ config: {}                       # Configs individuelles à splitter (sans désa
 
 ```bash
 # En LOCAL — exporter avec les splits actifs
-ddev drush cex -y
+docker compose exec php drush cex -y
 # → génère config/sync/ (commun) + config/dev/ (modules dev)
 
 # En PROD — importer avec les splits prod actifs
@@ -170,7 +170,7 @@ Config Ignore empêche certaines configs d'être écrasées lors d'un `drush cim
 
 ```bash
 composer require drupal/config_ignore
-ddev drush en config_ignore -y
+docker compose exec php drush en config_ignore -y
 ```
 
 ### Configuration (`/admin/config/development/configuration/ignore`)
@@ -203,7 +203,7 @@ Config Readonly empêche toute modification de configuration via l'UI en product
 
 ```bash
 composer require drupal/config_readonly
-ddev drush en config_readonly -y
+docker compose exec php drush en config_readonly -y
 ```
 
 ```php
@@ -217,6 +217,57 @@ if (getenv('APP_ENV') === 'production') {
 ```
 
 Résultat : tout formulaire qui modifierait la config affiche un message d'erreur. Force le workflow Git.
+
+---
+
+## Interaction config_split + config_ignore — Règles de Priorité
+
+Les deux modules opèrent à des niveaux différents mais leur interaction piège les développeurs.
+
+```
+config_split  →  PARTITIONNE les configs (quel répertoire, quel env)
+config_ignore →  PROTÈGE des configs de l'import (garde la valeur en DB)
+```
+
+### Tableau des combinaisons
+
+| Dans split ? | Dans ignore ? | Comportement à `drush cim` |
+|-------------|--------------|---------------------------|
+| ✅ actif | ❌ | Importée depuis le répertoire du split |
+| ❌ | ✅ | **Ignorée** — valeur DB conservée |
+| ✅ actif | ✅ | **Ignorée** — `config_ignore` gagne toujours |
+| ✅ inactif | ❌ | Supprimée si absente de `config/sync/` |
+| ✅ inactif | ✅ | Protégée par `config_ignore` même si split inactif |
+
+### Cas pratique : webforms éditables en prod + devel exclu
+
+```yaml
+# config_ignore.settings.yml
+ignored_config_entities:
+  - webform.webform.*          # webforms édités en prod → protégés
+  - webform.webform_options.*
+  - system.site                # nom du site peut différer
+
+# config_split.config_split.prod.yml
+blacklist:
+  - devel.settings             # modules dev → exclus en prod
+  - devel.toolbar
+```
+
+Ces deux modules coexistent sans conflit : `config_ignore` protège les webforms, `config_split` exclut devel.
+
+### Anti-pattern : config_ignore trop large
+
+```yaml
+# ❌ Bloque toutes les mises à jour de champs
+ignored_config_entities:
+  - field.field.*
+
+# ✅ Cibler précisément ce qui est éditable en prod
+ignored_config_entities:
+  - webform.webform.*
+  - system.site
+```
 
 ---
 

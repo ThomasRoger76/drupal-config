@@ -199,3 +199,105 @@ docker compose exec php drush pm:enable mon_module -y
 # Forcer l'UUID d'un site (résolution de conflit UUID)
 docker compose exec php drush config:set system.site uuid "VOTRE-UUID-ICI"
 ```
+
+---
+
+## Performance des Imports Config — Grands Projets (1000+ fichiers YAML)
+
+Certains projets accumulent 1200+ fichiers YAML de configuration (typiquement : Views avec beaucoup de displays, nombreux `entity_view_display`, champs répétés par bundle). L'import peut devenir lent (30-120 secondes).
+
+### Diagnostiquer ce qui ralentit
+
+```bash
+# Compter le nombre total de fichiers YAML
+ls config/sync/ | wc -l
+
+# Les Views avec beaucoup de displays sont les plus lentes à importer
+ls -la config/sync/views.view.*.yml | sort -k5 -rn | head -10
+
+# Compter les entity_view_display (souvent nombreux sur les gros projets)
+ls config/sync/ | grep "core.entity_view_display" | wc -l
+
+# Mesurer le temps d'import réel
+time docker compose exec php drush config:import -y
+```
+
+### Optimiser l'import
+
+```bash
+# Vider les caches AVANT l'import — évite les locks et conflits de cache
+docker compose exec php drush cr
+docker compose exec php drush config:import -y
+docker compose exec php drush cr
+
+# Import partiel (modules spécifiques) — éviter d'importer tout le projet
+# Utile pendant le développement pour n'appliquer qu'un sous-ensemble
+docker compose exec php drush config:import --partial --source=config/updates/ -y
+
+# En production — augmenter la mémoire PHP pour les imports lourds
+docker compose exec -e PHP_MEMORY_LIMIT=512M php drush deploy -y
+
+# Vérifier l'utilisation mémoire pendant un import
+docker compose exec php php -r "
+  echo 'Mémoire disponible : ' . ini_get('memory_limit') . PHP_EOL;
+  echo 'Mémoire actuelle : ' . round(memory_get_usage() / 1024 / 1024, 2) . ' Mo' . PHP_EOL;
+"
+```
+
+### Identifier les YAML problématiques
+
+```bash
+# Top 10 des fichiers YAML les plus lourds (en octets)
+ls -la config/sync/*.yml | sort -k5 -rn | head -10
+
+# Chercher les Views avec plus de 3 displays (souvent lentes)
+for f in config/sync/views.view.*.yml; do
+  displays=$(grep -c "^  display:" "$f" 2>/dev/null || echo 0)
+  echo "$displays $f"
+done | sort -rn | head -10
+
+# Modules avec le plus de fichiers de config
+ls config/sync/*.yml | sed 's/config\/sync\///' | cut -d. -f1 | sort | uniq -c | sort -rn | head -15
+```
+
+### Optimisation en CI/CD
+
+```yaml
+# .gitlab-ci.yml — augmenter le timeout pour les imports lourds
+deploy:
+  stage: deploy
+  script:
+    - |
+      docker compose exec -T php bash -c "
+        export PHP_MAX_EXECUTION_TIME=300
+        vendor/bin/drush deploy -y
+      "
+  timeout: 10 minutes   # Augmenter selon la taille du projet (défaut: 1h)
+  variables:
+    # Augmenter la mémoire PHP pour les imports de config volumineux
+    PHP_MEMORY_LIMIT: 512M
+```
+
+### Stratégie de réduction du nombre de fichiers YAML
+
+```bash
+# Identifier les Views inutilisées (aucune page, aucun block actif)
+docker compose exec php drush php:eval "
+  \$views = \Drupal::entityTypeManager()->getStorage('view')->loadMultiple();
+  foreach (\$views as \$view) {
+    if (!\$view->status()) {
+      echo 'DÉSACTIVÉE : ' . \$view->id() . PHP_EOL;
+    }
+  }
+"
+
+# Identifier les entity_view_display sans utilisation réelle
+# (les display 'default' de bundles non utilisés peuvent être supprimées)
+ls config/sync/ | grep "core.entity_view_display" | grep "\.default\." | wc -l
+
+# Supprimer une View inutilisée (et exporter)
+docker compose exec php drush php:eval "\Drupal::entityTypeManager()->getStorage('view')->load('view_inutilisee')->delete();"
+docker compose exec php drush cex -y
+```
+
+> **Règle :** sur les projets avec 1000+ fichiers YAML, prévoir `timeout: 15 minutes` dans le pipeline CI et `PHP_MEMORY_LIMIT=512M`. L'import d'une config HGO (1252 fichiers) prend typiquement 45-90 secondes selon la charge serveur.

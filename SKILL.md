@@ -103,7 +103,7 @@ Référentiel complet du système de gestion de configuration Drupal 8-11+ : cyc
 - `drupal-core` — Config API PHP (lecture/écriture programmatique simple)
 - `drupal-theming` — Config du thème (`config/install/` du thème)
 - `drupal-testing` — Tester la config avec KernelTest
-- `drupal-tooling` — Drush CLI complet (cex/cim, deploy, sql-dump, aliases)
+- `drupal-deployment` — drush deploy, workflow de déploiement, drush aliases
 - `drupal-docker` — Environnement Docker Compose, config, hooks, services
 - `drupal-multilingual` — Config Translation, overrides par langue
 - `drupal-migration` — Config après migration de version, `hook_deploy_N`

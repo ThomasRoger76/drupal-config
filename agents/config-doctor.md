@@ -27,17 +27,26 @@ docker compose exec php drush status --fields=drupal-version,php-version,db-driv
 ```
 
 ### Étape 2 — Conflits UUID
+
+Le YAML git est la source de vérité. Si l'UUID DB ne correspond pas au YAML, c'est la DB qu'il faut corriger — jamais le YAML.
+
 ```bash
-# Vérifier que l'UUID du site correspond aux fichiers YAML
-docker compose exec php drush php:eval "echo \Drupal::config('system.site')->get('uuid');"
-grep "^uuid:" config/default/sync/system.site.yml
-# Si différent → corriger automatiquement
+# Comparer UUID DB vs YAML git
+DB_UUID=$(docker compose exec php drush php:eval "echo \Drupal::config('system.site')->get('uuid');")
+YAML_UUID=$(grep "^uuid:" config/sync/system.site.yml | awk '{print $2}')
+echo "DB   : $DB_UUID"
+echo "YAML : $YAML_UUID"
 ```
 
-**Fix automatique UUID :**
+**Fix automatique — mettre l'UUID du YAML dans la DB (direction correcte) :**
 ```bash
-SITE_UUID=$(docker compose exec php drush php:eval "echo \Drupal::config('system.site')->get('uuid');")
-sed -i "s/^uuid: .*/uuid: $SITE_UUID/" config/default/sync/system.site.yml
+# ✅ CORRECT : le YAML git est la source de vérité → corriger la DB
+YAML_UUID=$(grep "^uuid:" config/sync/system.site.yml | awk '{print $2}')
+docker compose exec php drush config:set system.site uuid "$YAML_UUID" -y
+echo "UUID DB mis à jour : $YAML_UUID"
+
+# ❌ NE PAS FAIRE : écraser le YAML avec l'UUID de la DB prod
+# (interdit — corromprait la source de vérité git)
 ```
 
 ### Étape 3 — YAML malformés

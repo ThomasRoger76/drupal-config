@@ -1,6 +1,6 @@
 ---
 name: drupal-config
-description: Use when managing Drupal configuration between environments, debugging UUID conflicts on drush cim, configuring sync directory in settings.php, implementing environment overrides with $config or config_split, understanding Simple Config vs Config Entities, resolving config dependency cascades, or writing hook_deploy_N post-import scripts in Drupal 8-11+
+description: Use when managing Drupal configuration between environments, debugging UUID conflicts on drush cim, configuring sync directory in settings.php, implementing environment overrides with $config or config_split, understanding Simple Config vs Config Entities, resolving config dependency cascades, writing hook_deploy_N post-import scripts, translating configuration with config_translation, managing config/optional/ conditional imports, applying Drupal Recipes (recipe.yml), or configuring multisite with per-site config_split in Drupal 8-11+
 ---
 
 # Drupal Config Management — Référence Complète

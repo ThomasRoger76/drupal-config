@@ -2,6 +2,20 @@
 
 ---
 
+## v1.2 — 2026-05-16
+
+**Bug critique corrigé :**
+- `agents/config-doctor.md` Étape 2 — Fix UUID inversé : la commande `sed -i` écrasait les fichiers YAML git avec l'UUID de la DB prod. Corrigé dans la bonne direction : l'UUID du YAML git est mis dans la DB (`drush config:set system.site uuid "$YAML_UUID"`). Ajout d'un commentaire explicit `# ❌ NE PAS FAIRE`.
+
+**Description frontmatter étendue :**
+- Ajout : `config_split`, `drupal recipes`, `config_translation`, `config/optional/`, `multisite avec config_split`
+- Garantit le déclenchement du skill sur ces cas d'usage couverts
+
+**Quick Decision Table :**
+- Nouvelle entrée : `ConfigEvents::SAVE / DELETE / IMPORT` via EventSubscriber (→ `config-hooks.md`)
+
+---
+
 ## v1.1 — 2026-05-14
 
 **Bugs corrigés :**

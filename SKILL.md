@@ -51,6 +51,7 @@ Référentiel complet du système de gestion de configuration Drupal 8-11+ : cyc
 | Forcer l'import d'une optional config après install | `config.installer` service ou `drush config:import --partial` | [config-optional.md](config-optional.md) |
 | Ordre CI/CD correct (config avant migrations) | `drush deploy` puis `drush migrate:import` | [config-optional.md](config-optional.md) |
 | Importer config optional en hook_install | `\Drupal::service('config.installer')->installOptionalConfig()` | [config-optional.md](config-optional.md) |
+| Réagir à une sauvegarde / suppression / import de config | `ConfigEvents::SAVE`, `DELETE`, `IMPORT` via EventSubscriber | [config-hooks.md](config-hooks.md) |
 | Distribuer un set de config réutilisable | Drupal Recipes (`recipe.yml`) | [drupal-recipes.md](drupal-recipes.md) |
 | Appliquer une recipe sur un site existant | `drush recipe web/recipes/mon_recipe` | [drupal-recipes.md](drupal-recipes.md) |
 | Config Actions (createIfNotExists, grantPermissions) | `config.actions:` dans recipe.yml | [drupal-recipes.md](drupal-recipes.md) |

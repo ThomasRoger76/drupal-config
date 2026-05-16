@@ -60,6 +60,8 @@ Référentiel complet du système de gestion de configuration Drupal 8-11+ : cyc
 | Traduire la config programmatiquement | `language_manager->getLanguageConfigOverride()` | [config-translation.md](config-translation.md) |
 | Comprendre où sont stockées les traductions de config | Tables `locale_*` de la DB (pas dans YAML) | [config-translation.md](config-translation.md) |
 | Mettre à jour les traductions contrib depuis drupal.org | `drush locale:update` | [config-translation.md](config-translation.md) |
+| **Synchroniser du contenu entre envs (nœuds, termes)** | `drupal/single_content_sync` — UI `/admin/content/single-content-sync` | [workflow-commands.md](workflow-commands.md) |
+| Exporter un nœud vers YAML (déployer du contenu) | UI export → commit YAML → UI import sur cible | [workflow-commands.md](workflow-commands.md) |
 | Configurer plusieurs sites sur une installation | `sites.php` + `settings.php` par site | [multisite.md](multisite.md) |
 | Config partagée + config spécifique par site | `config_split` par site, activé dans `settings.php` | [multisite.md](multisite.md) |
 | Exécuter drush sur un site multisite spécifique | `drush --uri=https://site.com` | [multisite.md](multisite.md) |
